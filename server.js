@@ -1,11 +1,24 @@
 const express = require("express");
-const https = require("https")
+const https = require("https");
+const bodyParser = require("body-parser");
 
 const app = express();
 
+app.use(bodyParser.urlencoded({extended : true}));
+
 app.get("/", function(req, res){
+    res.sendFile(__dirname + "/index.html") ;
+    
+   
+});
+
+app.post("/", function(req,res){
+
+     const query = req.body.cityName;
+     const apiId = "e6f393fb5650c5762870e285dc637428";
+     const unit = "metric";
         
-          const url="https://api.openweathermap.org/data/2.5/weather?q=Delhi&units=metric&appid=e6f393fb5650c5762870e285dc637428"
+          const url="https://api.openweathermap.org/data/2.5/weather?q=" + query +"&units=" + unit +"&appid=" + apiId;
           https.get(url , function(response){
           console.log(response.statusCode);
           
@@ -13,14 +26,20 @@ app.get("/", function(req, res){
                const weatherData = JSON.parse(data);
                console.log(weatherData);
                const temp = weatherData.main.temp;
-               console.log(temp);
                const weatherDescription = weatherData.weather[0].description;
-               console.log(weatherDescription);
+               const icon = weatherData.weather[0].icon;
+               const imageUrl = "http://openweathermap.org/img/wn/" + icon + "@2x.png";
+               res.write("<p>The weather is currently " + weatherDescription + ".</p>");
+               res.write("<h1>The temperature in " + query +" is "+ temp + " degress Celcius.</h1>");
+               res.write("<img src=" + imageUrl+">");
+               res.send();
           });
           });
-    
-    res.send("app is up and running");
+   
 });
+
+
+
 
 
 
